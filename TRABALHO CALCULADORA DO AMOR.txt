@@ -1,0 +1,279 @@
+<!DOCTYPE html><html lang="pt-PT"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora do Amor ❤️</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #ff4d6d;
+            --secondary-color: #ffb3c1;
+            --dark-color: #c9184a;
+            --light-color: #fff0f3;
+            --text-color: #590d22;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, var(--light-color), #ffffff);
+            margin: 0;
+            padding: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            color: var(--text-color);
+        }
+
+        .love-calculator {
+            background-color: white;
+            padding: 2rem 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+            border: 1px solid #ffe0e5;
+            transition: all 0.3s ease;
+        }
+
+        .love-calculator h1 {
+            font-family: 'Pacifico', cursive;
+            color: var(--primary-color);
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .love-calculator p {
+            margin-bottom: 2rem;
+            color: #800f2f;
+            font-size: 0.95rem;
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border-radius: 10px;
+            border: 1px solid #ffc2d1;
+            font-size: 1rem;
+            box-sizing: border-box;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            text-align: center;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px var(--secondary-color);
+        }
+        
+        .heart-icon {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            margin: 0.5rem 0;
+            animation: beat 1.5s infinite ease-in-out;
+        }
+
+        @keyframes beat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        button {
+            background: linear-gradient(45deg, var(--primary-color), var(--dark-color));
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            border-radius: 50px;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s, box-shadow 0.3s;
+            margin-bottom: 1rem;
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(255, 77, 109, 0.3);
+        }
+        
+        #error-message {
+            color: var(--dark-color);
+            font-weight: 500;
+            height: 20px;
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        #result-area {
+            margin-top: 1.5rem;
+            visibility: hidden;
+            opacity: 0;
+            height: 0;
+            transition: opacity 0.5s ease-in-out;
+            overflow: hidden;
+        }
+
+        #result-area.show {
+            visibility: visible;
+            opacity: 1;
+            height: auto;
+        }
+
+        #result-area h2 {
+            font-family: 'Pacifico', cursive;
+            font-size: 2rem;
+            color: var(--primary-color);
+        }
+
+        #result-image {
+            width: 100%;
+            max-width: 350px;
+            border-radius: 15px;
+            margin-top: 1rem;
+            border: 2px solid var(--light-color);
+        }
+    </style></head><body>
+
+    <main class="love-calculator">
+        <h1>Calculadora do Amor</h1>
+        <p>Descubra a vossa compatibilidade! Insira dois nomes e veja a magia acontecer.</p>
+        
+        <div class="input-group">
+            <input type="text" id="name1" placeholder="O seu nome" aria-label="Seu Nome">
+        </div>
+        
+        <div class="heart-icon">❤️</div>
+
+        <div class="input-group">
+            <input type="text" id="name2" placeholder="O nome do seu crush" aria-label="Nome do seu crush">
+        </div>
+
+        <button id="calculate-btn">Calcular</button>
+        <div id="error-message">Por favor, preencha os dois nomes.</div>
+
+        <section id="result-area">
+            <h2 id="result-percentage"></h2>
+            <img id="result-image" alt="Resultado da compatibilidade em imagem">
+        </section>
+        
+        <canvas id="loveCanvas" width="500" height="300" style="display: none;"></canvas>
+    </main>
+
+    <script>
+        // Elementos do DOM
+        const name1Input = document.getElementById('name1');
+        const name2Input = document.getElementById('name2');
+        const calculateBtn = document.getElementById('calculate-btn');
+        const errorMessage = document.getElementById('error-message');
+        const resultArea = document.getElementById('result-area');
+        const resultPercentage = document.getElementById('result-percentage');
+        const resultImage = document.getElementById('result-image');
+        const canvas = document.getElementById('loveCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Event listener para o botão de calcular
+        calculateBtn.addEventListener('click', () => {
+            const name1 = name1Input.value.trim();
+            const name2 = name2Input.value.trim();
+
+            // Validação dos nomes
+            if (name1 === '' || name2 === '') {
+                errorMessage.style.visibility = 'visible';
+                errorMessage.style.opacity = '1';
+                resultArea.classList.remove('show');
+                return;
+            }
+            
+            errorMessage.style.visibility = 'hidden';
+            errorMessage.style.opacity = '0';
+
+            // Lógica de cálculo
+            const percentage = calculateLove(name1, name2);
+            
+            // Exibir resultados
+            resultPercentage.textContent = `${percentage}% de Compatibilidade!`;
+            
+            // Gerar e exibir a imagem
+            generateImage(name1, name2, percentage);
+            
+            resultArea.classList.add('show');
+        });
+
+        /**
+         * Calcula a percentagem de amor com base nos nomes.
+         * Esta é uma função de exemplo para fins de entretenimento.
+         * @param {string} name1
+         * @param {string} name2
+         * @returns {number} A percentagem de 0 a 100.
+         */
+        function calculateLove(name1, name2) {
+            const combinedNames = (name1 + name2).toLowerCase();
+            let sum = 0;
+            for (let i = 0; i < combinedNames.length; i++) {
+                sum += combinedNames.charCodeAt(i);
+            }
+            // Um cálculo simples para obter um resultado entre 40 e 100
+            const percentage = (sum % 61) + 40; 
+            return percentage;
+        }
+
+        /**
+         * Gera uma imagem personalizada no canvas com os nomes e a percentagem.
+         * @param {string} name1
+         * @param {string} name2
+         * @param {number} percentage
+         */
+        function generateImage(name1, name2, percentage) {
+            // Limpar o canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // 1. Desenhar o fundo
+            const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+            gradient.addColorStop(0, '#fff0f3');
+            gradient.addColorStop(1, '#ffb3c1');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // 2. Desenhar o coração grande no centro
+            // Este é um coração desenhado com a API do Canvas
+            ctx.fillStyle = 'rgba(255, 77, 109, 0.8)';
+            ctx.beginPath();
+            ctx.moveTo(250, 120);
+            ctx.bezierCurveTo(250, 110, 240, 95, 220, 95);
+            ctx.bezierCurveTo(190, 95, 190, 132.5, 190, 132.5);
+            ctx.bezierCurveTo(190, 150, 210, 172, 250, 190);
+            ctx.bezierCurveTo(290, 172, 310, 150, 310, 132.5);
+            ctx.bezierCurveTo(310, 132.5, 310, 95, 280, 95);
+            ctx.bezierCurveTo(260, 95, 250, 110, 250, 120);
+            ctx.fill();
+
+            // 3. Escrever a percentagem dentro do coração
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 70px Poppins';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(`${percentage}%`, 250, 140);
+            
+            // 4. Escrever os nomes
+            ctx.fillStyle = '#590d22';
+            ctx.font = '50px Pacifico';
+            
+            // Primeiro nome
+            ctx.fillText(name1, 250, 60);
+            
+            // Segundo nome
+            ctx.fillText(name2, 250, 240);
+
+            // 5. Converter o canvas para uma imagem e exibi-la
+            const dataUrl = canvas.toDataURL('image/png');
+            resultImage.src = dataUrl;
+        }
+    </script></body></html>
